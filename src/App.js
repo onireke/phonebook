@@ -2,12 +2,7 @@ import axios from "axios";
 import { useState, useEffect } from "react";
 
 function App() {
-  const [persons, setPersons] = useState([
-    // { name: 'Arto Hellas', number: '040-123456', id: 1 },
-    // { name: 'Ada Lovelace', number: '39-44-5323523', id: 2 },
-    // { name: 'Dan Abramov', number: '12-43-234345', id: 3 },
-    // { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4 }
-  ]);
+  const [persons, setPersons] = useState([]);
 
   const [newName, setNewName] = useState(" ");
   const [newNumber, setNewNumber] = useState();
@@ -22,9 +17,7 @@ function App() {
       setPersons(response.data);
     });
   }, []);
-  //   const filteredPersons = persons.filter((person) =>
-  //     person.name.toLowerCase().includes(newFilter.toLowerCase())
-  //   );
+
   const peopleToShow = newFilter
     ? persons.filter((person) =>
         person.name.toLowerCase().includes(newFilter.toLowerCase())
@@ -45,6 +38,13 @@ function App() {
         number: newNumber,
         id: persons.length + 1,
       };
+
+      axios
+        .post("http://localhost:3001/persons", newPerson)
+        .then((response) => {
+          setPersons(persons.concat(response.data));
+          setNewNumber("");
+        });
 
       setPersons(persons.concat(newPerson));
     } else if (checkNameExists.length === !0) {
@@ -71,6 +71,17 @@ function App() {
     setNewFilter(event.target.value);
   }
 
+  const handleDelete = (id) => {
+    peopleToShow.find((person) => {
+      return window.confirm(`delete ${person.name}?`);
+    });
+
+    const filterPerson = peopleToShow.filter((person) => {
+      return person.id !== id;
+    });
+    setPersons(filterPerson);
+  };
+
   return (
     <div className="App">
       <h2>Phonebook</h2>
@@ -94,7 +105,8 @@ function App() {
       <ul>
         {peopleToShow.map((person) => (
           <p key={person.id}>
-            {person.name} {person.number}
+            {person.name} {person.number}{" "}
+            <button onClick={() => handleDelete(person.id)}>delete</button>
           </p>
         ))}
       </ul>
